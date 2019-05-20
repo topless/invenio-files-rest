@@ -36,7 +36,6 @@ model.
 
 from __future__ import absolute_import, print_function
 
-import mimetypes
 import re
 import uuid
 from datetime import datetime
@@ -58,7 +57,7 @@ from .errors import BucketLockedError, FileInstanceAlreadySetError, \
     MultipartInvalidChunkSize, MultipartInvalidPartNumber, \
     MultipartInvalidSize, MultipartMissingParts, MultipartNotCompleted
 from .proxies import current_files_rest
-from .utils import ENCODING_MIMETYPES, guess_mimetype
+from .utils import guess_mimetype
 
 slug_pattern = re.compile('^[a-z][a-z0-9-]+$')
 
