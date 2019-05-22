@@ -8,8 +8,12 @@
 
 Overview
 ========
-In order to better understand what you can achieve with the module, we will
-first introduce the main concepts.
+Invenio-Files-REST is a files storage module. It allows you to store and retrieve
+files in a similar way to Amazon S3 APIs.
+
+In order to better understand what you can achieve with this Invenio module,
+the following overview will introduce you to its key concepts and terminology.
+
 In Invenio-Files-REST, a file is represented by an abstraction called :code:`Object`.
 An Object acts like container for a particular file (as identified by its name),
 and holds *it* as well as all its previous versions (if any). The latest version
