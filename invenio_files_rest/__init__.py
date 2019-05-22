@@ -728,7 +728,7 @@ There is also a predefined task :code:`verify_checksum` which can be configured
 to run periodically (default is every 30 days) which iterates all files in our
 storage and validates their checksum.
 
->>> "Get the checksum of an uploaded file for demo"
+"Get the checksum of an uploaded file for demo"
 
 Signals
 -------
@@ -740,13 +740,15 @@ Events are sent in case of:
 
 Let's request to download a file, and capture the signal:
 
->>> from invenio_files_rest.signals import file_downloaded
+.. code-block:: python
 
->>> def after_file_downloaded(send, *args, *kwargs):
-...     print('Signal file_downloaded emitted')
-...
->>> listener = file_downloaded.connect(after_file_downloaded)
->>> # Request to dowload a file for the event to trigger
+    from invenio_files_rest.signals import file_downloaded
+
+    def after_file_downloaded(send, *args, *kwargs):
+        print('Signal file_downloaded emitted')
+
+    listener = file_downloaded.connect(after_file_downloaded)
+    # Request to dowload a file for the event to trigger
 
 You can read more about the `Flask Signals
 <http://flask.pocoo.org/docs/1.0/signals/>`_.
