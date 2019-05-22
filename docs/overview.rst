@@ -8,16 +8,29 @@
 
 Overview
 ========
+In order to better understand what you can achieve with the module, we will
+first introduce the main concepts.
+In Invenio-Files-REST, a file is represented by an abstraction called :code:`Object`.
+An Object acts like container for a particular file (as identified by its name),
+and holds *it* as well as all its previous versions (if any). The latest version
+of the file is referred to as the :code:`HEAD`, while a version of the file is
+referred to as an :code:`Object Version`. The link between an :code:`Object Version`
+and the actual file on disk is made by a :code:`File Instance`. What this allows
+is for multiple :code:`Object Versions` to point to the same :code:`File Instance`,
+allowing some operations to be performed more efficiently, such as snapshots
+without duplicating files or migrating data.
+Just as in a computer files are contained inside folders, each :code:`Object` has
+to be contained in a :code:`Bucket`. The bucket is identified by a unique ID,
+assigned automatically at creation. A :code:`Bucket` is created by default in the
+default :code:`Location`, however that can be changed such that when creating a
+:code:`Bucket`, a particular :code:`Location` for it can be specified. The
+:code:`Bucket` can also have a maximum quota assigned to it, and an important
+point to note is that the :code:`Objects` inside it do not necessarily have to
+be located in the same :code:`Location`. The :code:`Location` can be used to
+represent various storage systems and/or various geo-locations.
 
-In order to upload files, a Location needs to be defined first.
-This will be the default location all buckets will have.
-After having created the location, a bucket also needs to be created to hold
-our file(s).
-At this point a file can be uploaded, which will be represented by an
-ObjectVersion inside an Object, linked to a FileInstance,
-pointing to the actual location on disk.
-
-Let's first describe the main concepts behind InvenioFilesREST:
+Thus, for a file to be stored, we need to make sure we have defined at least a
+default :code:`Location`, as well as a :code:`Bucket` for that location.
 
 
 Buckets
