@@ -21,10 +21,10 @@ features such as:
 
 - A robust REST API.
 - Configurable storage backends with the ability to build your very own.
-- Highly customizable permission mechanism for access-control.
+- Highly customizable access-control.
 - Secure file handling.
 - Integrity checking mechanism.
-- Supports for large file uploads and multipart upload.
+- Support for large file uploads and multipart upload.
 - Signals for system events.
 
 The REST API follows best practices and supports, e.g.:
@@ -53,7 +53,7 @@ Now to configure our application:
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 >>> app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 >>> app.config['FILES_REST_PERMISSION_FACTORY'] = \
-    lambda: type('Allow', (), {'can': lambda self: True})()
+        lambda: type('Allow', (), {'can': lambda self: True})()
 
 
 Now let's initialize all required Invenio extensions:
