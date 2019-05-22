@@ -52,7 +52,8 @@ Now to configure our application:
 >>> app.config['SECRET_KEY'] = 'CHANGEME'
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 >>> app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
->>> app.config['FILES_REST_PERMISSION_FACTORY'] = allow_all
+>>> app.config['FILES_REST_PERMISSION_FACTORY'] = \
+    lambda: type('Allow', (), {'can': lambda self: True})()
 
 
 Now let's initialize all required Invenio extensions:
@@ -539,8 +540,8 @@ You will need some extra configurations for nginx and Flask application.
 
 1. There is a possibility that Ngxinx might return
 :code:`413 (Request Entity Too Large)` for large files. In the configuration
-the body size of the request can be customized according to our needs. In the
-following example we configure our nginx to accept up to :code:`25MB`
+the body size of the request can be customized according to our needs. The
+following example configures nginx to accept up to :code:`25MB`.
 
 .. code-block:: console
 
