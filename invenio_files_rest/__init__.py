@@ -215,7 +215,8 @@ Initiate multipart upload:
 
 .. code-block:: console
 
-    POST /files/<bucket_id>/<file_name>?uploads&size=<total_size>&partSize=<part_size>
+    POST /files/<bucket_id>/<file_name>?
+         uploads&size=<total_size>&partSize=<part_size>
 
 Finalize multipart upload:
 
@@ -313,9 +314,12 @@ First let's create a bucket:
         "updated": "2019-05-16T13:07:21.595398+00:00",
         "locked": false,
         "links": {
-            "self": "http://localhost:5000/files/cb8d0fa7-2349-484b-89cb-16573d57f09e",
-            "uploads": "http://localhost:5000/files/cb8d0fa7-2349-484b-89cb-16573d57f09e?uploads",
-            "versions": "http://localhost:5000/files/cb8d0fa7-2349-484b-89cb-16573d57f09e?versions"
+            "self": "http://localhost:5000/files/
+                     cb8d0fa7-2349-484b-89cb-16573d57f09e",
+            "uploads": "http://localhost:5000/files/
+                        cb8d0fa7-2349-484b-89cb-16573d57f09e?uploads",
+            "versions": "http://localhost:5000/files/
+                         cb8d0fa7-2349-484b-89cb-16573d57f09e?versions"
         },
         "created": "2019-05-16T13:07:21.595391+00:00",
         "quota_size": null,
@@ -350,9 +354,15 @@ Upload a file:
         "mimetype": "text/plain",
         "updated": "2019-05-16T13:10:22.621533+00:00",
         "links": {
-            "self": "http://localhost:5000/files/cb8d0fa7-2349-484b-89cb-16573d57f09e/my_file.txt",
-            "version": "http://localhost:5000/files/cb8d0fa7-2349-484b-89cb-16573d57f09e/my_file.txt?versionId=7f62676d-0b8e-4d77-9687-8465dc506ca8",
-            "uploads": "http://localhost:5000/files/cb8d0fa7-2349-484b-89cb-16573d57f09e/my_file.txt?uploads"
+            "self": "http://localhost:5000/files/
+                     cb8d0fa7-2349-484b-89cb-16573d57f09e/my_file.txt",
+
+            "version": "http://localhost:5000/files/
+                        cb8d0fa7-2349-484b-89cb-16573d57f09e/my_file.txt?
+                        versionId=7f62676d-0b8e-4d77-9687-8465dc506ca8",
+            "uploads": "http://localhost:5000/files/
+                        cb8d0fa7-2349-484b-89cb-16573d57f09e/
+                        my_file.txt?uploads"
         },
         "is_head": true,
         "tags": {},
@@ -436,9 +446,12 @@ The ID is contained in the response:
        "updated":"2019-05-17T06:52:52.897378+00:00",
        "locked":false,
        "links":{
-          "self":"http://localhost:5000/files/c896d17b-0e7d-44b3-beba-7e43b0b1a7a4",
-          "uploads":"http://localhost:5000/files/c896d17b-0e7d-44b3-beba-7e43b0b1a7a4?uploads",
-          "versions":"http://localhost:5000/files/c896d17b-0e7d-44b3-beba-7e43b0b1a7a4?versions"
+          "self":"http://localhost:5000/files/
+                  c896d17b-0e7d-44b3-beba-7e43b0b1a7a4",
+          "uploads":"http://localhost:5000/files/
+                     c896d17b-0e7d-44b3-beba-7e43b0b1a7a4?uploads",
+          "versions":"http://localhost:5000/files/
+                      c896d17b-0e7d-44b3-beba-7e43b0b1a7a4?versions"
        },
        "created":"2019-05-17T06:52:52.897373+00:00",
        "quota_size":null,
@@ -451,14 +464,23 @@ The ID is contained in the response:
    $ B=c896d17b-0e7d-44b3-beba-7e43b0b1a7a4
 
    $ curl -i -X POST \
-     "http://localhost:5000/files/$B/my_file.txt?uploads&size=11534336&partSize=6291456"
+     "http://localhost:5000/files/$B/my_file.txt?
+      uploads&size=11534336&partSize=6291456"
+
+.. code-block:: json
 
     {
        "updated":"2019-05-17T07:07:22.219002+00:00",
        "links":{
-          "self":"http://localhost:5000/files/c896d17b-0e7d-44b3-beba-7e43b0b1a7a4/my_file.txt?uploadId=a85b1cbd-4080-4c81-a95c-b4df5d1b615f",
-          "object":"http://localhost:5000/files/c896d17b-0e7d-44b3-beba-7e43b0b1a7a4/my_file.txt",
-          "bucket":"http://localhost:5000/files/c896d17b-0e7d-44b3-beba-7e43b0b1a7a4"
+          "self":"http://localhost:5000/files/
+                  c896d17b-0e7d-44b3-beba-7e43b0b1a7a4/my_file.txt?
+                  uploadId=a85b1cbd-4080-4c81-a95c-b4df5d1b615f",
+
+          "object":"http://localhost:5000/files/
+                    c896d17b-0e7d-44b3-beba-7e43b0b1a7a4/my_file.txt",
+
+          "bucket":"http://localhost:5000/files/
+                    c896d17b-0e7d-44b3-beba-7e43b0b1a7a4"
        },
        "last_part_size":5242880,
        "created":"2019-05-17T07:07:22.218998+00:00",
