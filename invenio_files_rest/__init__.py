@@ -162,13 +162,13 @@ Return list of files in bucket:
 
     GET /files/<bucket_id>/
 
-Returns list of file versions:
+Return list of file versions:
 
 .. code-block:: console
 
     GET /files/<bucket_id>?versions
 
-Returns list of multipart uploads:
+Return list of multipart uploads:
 
 .. code-block:: console
 
@@ -180,7 +180,7 @@ Download file:
 
     GET /files/<bucket_id>/<file_name>
 
-Returns list of parts of a multipart upload:
+Return list of parts of a multipart upload:
 
 .. code-block:: console
 
