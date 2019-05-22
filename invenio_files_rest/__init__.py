@@ -53,8 +53,9 @@ Now to configure our application:
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 >>> app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
->>> app.config['FILES_REST_PERMISSION_FACTORY'] = \
-...     lambda: type('Allow', (), {'can': lambda self: True})()
+>>> allow_all = lambda *args, **kwargs: \
+... type('Allow', (), {'can': lambda self: True})()
+>>> app.config['FILES_REST_PERMISSION_FACTORY'] = allow_all
 
 Now let's initialize all required Invenio extensions:
 
@@ -99,10 +100,9 @@ Let's create the database and tables, using an in-memory SQLite database:
 
 >>> db.create_all()
 
->>> srcroot = dirname(dirname(__file__))
+>>> srcroot = dirname(dirname('app.py'))
 >>> d = app.config['DATADIR']
->>> if exists(d):
->>>     shutil.rmtree(d)
+>>> if exists(d): shutil.rmtree(d)
 >>> makedirs(d)
 
 There's also a need to create a location for the buckets:
@@ -117,7 +117,7 @@ Now let's create a bucket:
 
 And see the response containing the id of the bucket:
 
->>> pprint(json.loads(res.get_data().decode("utf-8")))
+>>> json_response = json.loads(res.get_data().decode("utf-8"))
 
 
 REST API Overview
