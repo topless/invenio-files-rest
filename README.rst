@@ -23,9 +23,23 @@
         :target: https://github.com/inveniosoftware/invenio-files-rest/blob/master/LICENSE
 
 
-Files download/upload REST API similar to S3 for Invenio.
+Invenio-Files-REST provides configurable REST APIs for uploading, serving,
+downloading and deleting files.
 
-*This is an experimental developer preview release.*
+It can used as stand alone module or combined with
+`Invenio-Records <https://invenio-records.readthedocs.io>`_ through the
+`Invenio-Records-Files <https://invenio-records-files.readthedocs.io>`_
+integration.
 
-* Free software: MIT license
-* Documentation: https://invenio-files-rest.readthedocs.io/
+Features:
+
+ * A robust REST API.
+ * Configurable storage backends with the ability to build your very own.
+ * Highly customizable access-control.
+ * Secure file handling.
+ * Integrity checking mechanism.
+ * Support for large file uploads and multipart upload.
+ * Signals for system events.
+
+Further documentation available Documentation:
+https://invenio-files-rest.readthedocs.io/
