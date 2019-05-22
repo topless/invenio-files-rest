@@ -52,9 +52,9 @@ Now to configure our application:
 >>> app.config['SECRET_KEY'] = 'CHANGEME'
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 >>> app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
->>> app.config['FILES_REST_PERMISSION_FACTORY'] = \
-        lambda: type('Allow', (), {'can': lambda self: True})()
 
+>>> app.config['FILES_REST_PERMISSION_FACTORY'] = \
+...     lambda: type('Allow', (), {'can': lambda self: True})()
 
 Now let's initialize all required Invenio extensions:
 
@@ -77,18 +77,18 @@ Now let's initialize all required Invenio extensions:
 >>> from invenio_files_rest.views import blueprint
 >>> from invenio_files_rest.models import Location
 
->>> Babel(app)
->>> Menu(app)
->>> InvenioDB(app)
->>> InvenioREST(app)
->>> InvenioAdmin(app)
->>> InvenioAccounts(app)
->>> InvenioAccess(app)
+>>> ext_babel = Babel(app)
+>>> ext_menu = Menu(app)
+>>> ext_db = InvenioDB(app)
+>>> ext_rest = InvenioREST(app)
+>>> ext_admin = InvenioAdmin(app)
+>>> ext_accounts = InvenioAccounts(app)
+>>> ext_access = InvenioAccess(app)
 
 Finally, let's initialize InvenioFilesREST, register the blueprints
 and push a Flask application context:
 
->>> InvenioFilesREST(app)
+>>> ext_rest = InvenioFilesREST(app)
 
 >>> app.register_blueprint(accounts_blueprint)
 >>> app.register_blueprint(blueprint)

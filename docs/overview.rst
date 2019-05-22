@@ -37,6 +37,19 @@ Thus, for a file to be stored, we need to make sure we have defined at least a
 default :code:`Location`, as well as a :code:`Bucket` for that location.
 
 
+Location
+--------
+Locations are used to represent different storage systems and/or geographical
+locations.
+
+
+Storage
+-------
+Storage classes are useful for defining the type of storage an object is
+located on (e.g. offline/online), so that the system knowns if it can serve
+the file and/or what is the reliability.
+
+
 Buckets
 -------
 Buckets act as containers for :code:`Objects`. They have a unique identifier,
