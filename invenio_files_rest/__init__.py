@@ -606,8 +606,10 @@ serve user uploaded files. Here are some recommendations:
 
 1. Serve user uploaded files from a separate domain (not a subdomain). This
 way a malicious file can only attack other user uploaded files.
+
 2. Prevent the browser from rendering and executing HTML files by setting
 trusted=False.
+
 3. Force the browser to download the file as an attachment (as_attachment=True)
 by adding the :code:`download` keyword in the query parameters.
 
