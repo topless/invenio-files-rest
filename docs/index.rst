@@ -20,6 +20,7 @@ Invenio-Files-REST.
 
    installation
    configuration
+   overview
    usage
    exampleapp
 
