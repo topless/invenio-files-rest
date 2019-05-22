@@ -398,9 +398,28 @@ providing your implementations in the following :code:`config` variables.
 :py:data:`invenio_files_rest.config.FILES_REST_UPLOAD_FACTORIES`
 
 2. Use the :code:`@use_kwargs` decorator to map your JS upoader's parameters
-to :code:`content_length`, :code:`content_type`, :code:`uploaded_file` and
-:code:`file_tags_header`
+as in the example below, whereby the request paramater :code:`_totalSize`
+is mapped to :code:`content-length`:
 
+.. code-block:: python
+
+    @use_kwargs({
+        'content_length': fields.Int(
+            load_from='_totalSize',
+            location='form',
+            required=True,
+        ),
+        'content_type': fields.Str(
+            load_from='Content-Type',
+            location='headers',
+            required=True,
+        ),
+        'uploaded_file': fields.Raw(
+            load_from='file',
+            location='files',
+            required=True,
+        ),
+    })
 
 Multipart Upload
 ^^^^^^^^^^^^^^^^
