@@ -18,9 +18,9 @@ Invenio-Files-REST.
 .. toctree::
    :maxdepth: 2
 
+   overview
    installation
    configuration
-   overview
    usage
    exampleapp
 

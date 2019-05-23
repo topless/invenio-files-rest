@@ -8,90 +8,112 @@
 
 Overview
 ========
-Invenio-Files-REST is a files storage module. It allows you to store and retrieve
-files in a similar way to Amazon S3 APIs.
+Invenio-Files-REST is a files storage module. It allows you to store and
+retrieve files in a similar way to Amazon S3 APIs.
 
-In order to better understand what you can achieve with this Invenio module,
-the following overview will introduce you to its key concepts and terminology.
-
-In Invenio-Files-REST, a file is represented by an abstraction called :code:`Object`.
-An Object acts like container for a particular file (as identified by its name),
-and holds *it* as well as all its previous versions (if any). The latest version
-of the file is referred to as the :code:`HEAD`, while a version of the file is
-referred to as an :code:`Object Version`. The link between an :code:`Object Version`
-and the actual file on disk is made by a :code:`File Instance`. What this allows
-is for multiple :code:`Object Versions` to point to the same :code:`File Instance`,
-allowing some operations to be performed more efficiently, such as snapshots
-without duplicating files or migrating data.
-Just as in a computer files are contained inside folders, each :code:`Object` has
-to be contained in a :code:`Bucket`. The bucket is identified by a unique ID,
-assigned automatically at creation. A :code:`Bucket` is created by default in the
-default :code:`Location`, however that can be changed such that when creating a
-:code:`Bucket`, a particular :code:`Location` for it can be specified. The
-:code:`Bucket` can also have a maximum quota assigned to it, and an important
-point to note is that the :code:`Objects` inside it do not necessarily have to
-be located in the same :code:`Location`. The :code:`Location` can be used to
-represent various storage systems and/or various geo-locations.
-
-Thus, for a file to be stored, we need to make sure we have defined at least a
-default :code:`Location`, as well as a :code:`Bucket` for that location.
+Before getting started a brief overview will introduce you to the key concepts
+and terminology of the module.
 
 
 Location
 --------
-Locations are used to represent different storage systems and/or geographical
-locations.
+The first concept to introduce is :code:`Location`. Locations are used to
+represent different storage systems. :code:`Location` has a :code:`name` and a
+:code:`URI` which could be a path in a local directory or a URI on a remote
+system. It is required to have at least one Location.
+
+See the API section of :py:class:`invenio_files_rest.models.Location` for more
+information.
 
 
 Storage
 -------
-Storage classes are useful for defining the type of storage an object is
-located on (e.g. offline/online), so that the system knowns if it can serve
-the file and/or what is the reliability.
+Storage classes require a :code:`Location`, and they provide the interface to
+interact with it. Storage works a programming interface for interacting with
+files.
+
+An example of a remote storage system, can be found at
+`invenio-s3 <https://invenio-s3.readthedocs.io/>`_ which offers integration
+with any S3 REST API compatible object storage.
+
+See the API section of :py:class:`invenio_files_rest.storage` for more
+information.
 
 
-Buckets
--------
-Buckets act as containers for :code:`Objects`. They have a unique identifier,
-and a default location and storage class.
-However, the objects stored in the bucket can have different locations
-and storage classes.
+Bucket
+------
+Consider the :code:`Bucket` as a container for :code:`Objects`.
+
+The :code:`Bucket` is identified by a unique ID and is created by default in
+the default :code:`Location` with the default :code:`Storage` class unless you
+provide specific ones.
+
+For a file to be stored, we need to make sure we have defined at least a
+default :code:`Location`, as well as a :code:`Bucket` for that location.
+
+.. .note::
+
+    :code:`Objects` inside a :code:`Bucket` do not necessarily have the same
+    :code:`Location` or :code:`Storage` class as the :code:`Bucket`.
+
 A bucket can also be marked as deleted, in which case the contents become
-inaccessible, or can even be permanently removed,
-which also deletes all :code:`Objects` it contains,
-including their associated :code:`ObjectVersions`.
-A bucket created with a certain size quota, which by default is unlimited,
-and the bucket's size limit is determined by the default file size limiters.
-The size of the bucked is determined by the size of
-all Objects in the bucket (including all versions).
+inaccessible, or can even be permanently removed, which also deletes all
+:code:`Objects` it contains, including their associated :code:`ObjectVersions`.
+
+When a :code:`Bucket` gets created by default comes with unlimited size. You
+can specify the maximum size of a :code:`Bucket` which is a sum of the size of
+all :code:`Objects` in the bucket (including all versions).
+
+See the API section of :py:class:`invenio_files_rest.models.Bucket` for more
+information.
 
 
-Bucket Tags
+BucketTag
 -----------
-A bucket may have tags (key:value pairs) attached to it,
-that one may use to store extra information.
-The tags are identified uniquely within a bucket.
+:code:`BucketTag` is useful to store extra information for a :code:`Bucket`.
+A :code:`BucketTag` is in the form of :code:`key: value` pair and a
+:code:`Bucket` can have multiple :code:`BucketTag` uniquely identified by
+their keys. It is common to address the collection of `BucketTag` of a
+:code:`Bucket` as :code:`Bucket` metadata.
+
+See the API section of :py:class:`invenio_files_rest.models.BucketTag` for more
+information.
 
 
-Objects
--------
-Objects are an abstraction of a file, and are uniquely identified within
-a bucket by string keys, i.e. the file name.
+Object
+------
+An :code:`Object` is as an abstraction representation of a file, it doesn't
+come its own model (database table) but it is represented through via the
+:code:`ObjectVersion`. They are uniquely identified within a bucket by
+string keys. An :code:`Object` can have multiple :code:`ObjectVersion`
+pointing to it, useful for example for snapshotting a bucket without
+duplicating its contents, this is achieve via the :code:`FileInstance`.
+Just as in a computer files are contained inside folders, each :code:`Object`
+has to be contained in a :code:`Bucket`.
 
 
-Object Versions
----------------
-Object Versions represent versions of a file, and are uniquely identified
-within an Object belonging to a Bucket.
-An Object Version can be attached to one or more File Instances.
-If no File Instance is attached, this means that the particular Object Version
-was deleted (and is now a delete marker).
-Additionally, multiple object versions can be pointing to the same file on disk
-via File Instances
-(useful for e.g. snapshotting a bucket without duplicating its contents).
-
-
-File Instance
+ObjectVersion
 -------------
-A file instance represents files on disk. One file instance can have many
-objects linked to it.
+An :code:`ObjectVersion` represents a version of a file, and is uniquely
+identified within an Object. An :code:`ObjectVersion` is attached to one or
+more :code:`FileInstance`. If no :code:`FileInstance` is attached to it, it
+means that the particular :code:`ObjectVersion` was deleted (and is now a
+delete marker).
+
+The latest version of the file is referred to as the :code:`HEAD`, while a
+version of the file is referred to as an :code:`ObjectVersion`.
+
+See the API section of :py:class:`invenio_files_rest.models.ObjectVersion` for
+more information.
+
+
+FileInstance
+------------
+The actual link between an :code:`ObjectVersion` and the file on disk is made
+by a :code:`FileInstance`. This allows for multiple :code:`ObjectVersion`
+to point to the same :code:`FileInstance`, allowing some operations to be
+performed more efficiently, such as snapshots without duplicating files or
+migrating data.
+
+See the API section of :py:class:`invenio_files_rest.models.FileInstance` for
+more information.
