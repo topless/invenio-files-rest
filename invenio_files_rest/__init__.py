@@ -693,13 +693,9 @@ the bucket as the argument.
         lambda self, bucket, versions: bucket,
         'bucket-read',
     )
-    def my_function():
-        pass
+    def foo():
+        print("Fucntion foo can read the content of the bucket")
 
-.. note::
-
-    (This is mentioned in the code, not sure if should go here)
-    The actual file access is handled by the storage interface.
 
 See :mod:`invenio_files_rest.permissions` for extensive documentation.
 
@@ -728,7 +724,6 @@ There is also a predefined task :code:`verify_checksum` which can be configured
 to run periodically (default is every 30 days) which iterates all files in our
 storage and validates their checksum.
 
-"Get the checksum of an uploaded file for demo"
 
 Signals
 -------
