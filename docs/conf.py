@@ -30,6 +30,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinxcontrib.httpdomain',
+    'celery.contrib.sphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -320,6 +321,7 @@ intersphinx_mapping = {
                          None),
     'invenio-rest': ('https://invenio-rest.readthedocs.io/en/latest/', None),
     'python': ('https://docs.python.org/3', None),
+    'sqlalchemy': ('https://docs.sqlalchemy.org', None),
 }
 
 # Autodoc configuraton.
