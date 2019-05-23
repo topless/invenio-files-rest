@@ -23,23 +23,17 @@
         :target: https://github.com/inveniosoftware/invenio-files-rest/blob/master/LICENSE
 
 
-Invenio-Files-REST provides configurable REST APIs for uploading, serving,
-downloading and deleting files.
-
-It can used as stand alone module or combined with
-`Invenio-Records <https://invenio-records.readthedocs.io>`_ through the
-`Invenio-Records-Files <https://invenio-records-files.readthedocs.io>`_
-integration.
+Invenio-Files-REST is a files storage module. It allows you to store and
+retrieve files in a similar way to Amazon S3 APIs.
 
 Features:
 
- * A robust REST API.
- * Configurable storage backends with the ability to build your very own.
- * Highly customizable access-control.
- * Secure file handling.
- * Integrity checking mechanism.
+ * Files storage with configurable storage backends
+ * Secure REST APIs similar to Amazon S3
  * Support for large file uploads and multipart upload.
- * Signals for system events.
+ * Customizable access control
+ * File integrity monitoring
+
 
 Further documentation available Documentation:
 https://invenio-files-rest.readthedocs.io/
