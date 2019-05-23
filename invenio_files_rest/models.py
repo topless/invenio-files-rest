@@ -1716,5 +1716,6 @@ __all__ = (
     'Location',
     'MultipartObject',
     'ObjectVersion',
+    'ObjectVersionTag',
     'Part',
 )

@@ -35,5 +35,4 @@ Features:
  * File integrity monitoring
 
 
-Further documentation available Documentation:
-https://invenio-files-rest.readthedocs.io/
+Further documentation is available on https://invenio-files-rest.readthedocs.io/.

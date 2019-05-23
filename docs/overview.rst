@@ -20,7 +20,7 @@ Location
 The first concept to introduce is :code:`Location`. Locations are used to
 represent different storage systems. :code:`Location` has a :code:`name` and a
 :code:`URI` which could be a path in a local directory or a URI on a remote
-system. It is required to have at least one Location.
+system. It is required to define at least one default location.
 
 See the API section of :py:class:`invenio_files_rest.models.Location` for more
 information.
@@ -28,28 +28,83 @@ information.
 
 Storage
 -------
-Storage classes require a :code:`Location`, and they provide the interface to
-interact with it. Storage works a programming interface for interacting with
-files.
+A backend :code:`Storage` provides the interface to interact with a
+:code:`Location` and perform basic operations with files, such as retrieve,
+store or delete.
 
-An example of a remote storage system, can be found at
-`invenio-s3 <https://invenio-s3.readthedocs.io/>`_ which offers integration
+By default, Invenio-Files-REST provides a simple local files storage
+:py:class:`invenio_files_rest.storage.PyFSFileStorage`. You can define
+your own storage with the configuration :py:data:`invenio_files_rest.config.FILES_REST_STORAGE_FACTORY`.
+
+An example of a remote storage system can be found at
+`Invenio-S3 <https://invenio-s3.readthedocs.io/>`_ which offers integration
 with any S3 REST API compatible object storage.
 
 See the API section of :py:class:`invenio_files_rest.storage` for more
 information.
 
 
+FileInstance
+------------
+Files on disk are represented with :code:`FileInstance`. A file instance
+records the path to the file, but also its `Storage`, size and checksum of the
+file on disk.
+
+See the API section of :py:class:`invenio_files_rest.models.FileInstance` for
+more information.
+
+
+Object
+------
+An :code:`Object` is an abstract representation of the file metadata: it
+doesn't come with its own data model but it is defined by
+:code:`ObjectVersion`.
+
+
+ObjectVersion
+-------------
+An :code:`ObjectVersion` represents a version of an :code:`Object` at a
+specific point in time. It contains the :code:`FileInstance` that describes and
+a set of metadata.
+
+When it has no :code:`FileInstance`, it marks a deletion of a file as a delete
+marker (or soft deletion).
+
+The latest version of the file is referred to as the :code:`HEAD`.
+
+Object version are very useful to perform operation on files metadata without
+accessing directly to the storage. For example, multiple :code:`ObjectVersion`
+can point to the same :code:`FileInstance`, allowing operations to be
+performed more efficiently, such as snapshots without duplicating files or
+migrating data.
+
+See the API section of :py:class:`invenio_files_rest.models.ObjectVersion` for
+more information.
+
+
+ObjectVersionTag
+----------------
+
+:code:`ObjectVersionTag` is useful to store extra information for an
+:code:`ObjectVersion`.
+
+A :code:`ObjectVersionTag` is in the form of :code:`key: value` pair and an
+:code:`ObjectVersion` can have multiple :code:`ObjectVersionTag`.
+
+See the API section of
+:py:class:`invenio_files_rest.models.ObjectVersionTag` for more information.
+
+
 Bucket
 ------
 Consider the :code:`Bucket` as a container for :code:`ObjectVersion` objects.
+Just as in a computer, files are contained inside folders, each
+:code:`ObjectVersion` has to be contained in a :code:`Bucket`.
 
-The :code:`Bucket` is identified by a unique ID and is created by default in
-the default :code:`Location` with the default :code:`Storage` class unless you
-provide specific ones.
+The :code:`Bucket` is identified by an unique ID and is created in a
+given :code:`Location` with a given :code:`Storage`.
 
-For a file to be stored, we need to make sure we have created  a
-:code:`Location` and a :code:`Bucket`.
+:code:`ObjectVersion` are uniquely identified within a bucket by string keys.
 
 .. .note::
 
@@ -57,59 +112,19 @@ For a file to be stored, we need to make sure we have created  a
     :code:`Location` or :code:`Storage` class as the :code:`Bucket`.
 
 A bucket can also be marked as deleted, in which case the contents become
-inaccessible, or can even be permanently removed, which also deletes all
-:code:`Objects` it contains, including their associated :code:`ObjectVersions`.
+inaccessible. It can also be permanently removed: in this case, all contained :code:`ObjectVersions` will be also deleted.
 
 See the API section of :py:class:`invenio_files_rest.models.Bucket` for more
 information.
 
 
 BucketTag
------------
-:code:`BucketTag` is useful to store extra information for a :code:`Bucket`.
+---------
+Similarly to :code:`ObjectVersionTag`, a :code:`BucketTag` is useful to store
+extra information for a :code:`Bucket`.
+
 A :code:`BucketTag` is in the form of :code:`key: value` pair and a
-:code:`Bucket` can have multiple :code:`BucketTag` uniquely identified by
-their keys. It is common to address the collection of `BucketTag` of a
-:code:`Bucket` as :code:`Bucket` metadata.
+:code:`Bucket` can have multiple :code:`BucketTag`.
 
-See the API section of :py:class:`invenio_files_rest.models.BucketTag` for more
-information.
-
-
-Object
-------
-An :code:`Object` is as an abstraction representation of a file, it doesn't
-come its own model (database table) but it is represented through via the
-:code:`ObjectVersion`. They are uniquely identified within a bucket by
-string keys. An :code:`Object` can have multiple :code:`ObjectVersion`
-pointing to it, useful for example for snapshotting a bucket without
-duplicating its contents, this is achieve via the :code:`FileInstance`.
-Just as in a computer files are contained inside folders, each :code:`Object`
-has to be contained in a :code:`Bucket`.
-
-
-ObjectVersion
--------------
-An :code:`ObjectVersion` represents a version of a file, and is uniquely
-identified within an Object. An :code:`ObjectVersion` is attached to one or
-more :code:`FileInstance`. If no :code:`FileInstance` is attached to it, it
-means that the particular :code:`ObjectVersion` was deleted (and is now a
-delete marker).
-
-The latest version of the file is referred to as the :code:`HEAD`, while a
-version of the file is referred to as an :code:`ObjectVersion`.
-
-See the API section of :py:class:`invenio_files_rest.models.ObjectVersion` for
-more information.
-
-
-FileInstance
-------------
-The actual link between an :code:`ObjectVersion` and the file on disk is made
-by a :code:`FileInstance`. This allows for multiple :code:`ObjectVersion`
-to point to the same :code:`FileInstance`, allowing some operations to be
-performed more efficiently, such as snapshots without duplicating files or
-migrating data.
-
-See the API section of :py:class:`invenio_files_rest.models.FileInstance` for
+See the API section of :py:class:`invenio_files_rest.models.BucketTag` for
 more information.

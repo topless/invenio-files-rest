@@ -38,12 +38,12 @@ The REST API follows best practices and supports, e.g.:
 Initialization
 --------------
 
-First, let's create the flask application:
+First, let's create a Flask application:
 
 >>> from flask import Flask
 >>> app = Flask('myapp')
 
-Now to configure our application:
+And add some configuration, mainly for storage:
 
 >>> app.config['BROKER_URL'] = 'redis://'
 >>> app.config['CELERY_RESULT_BACKEND'] = 'redis://'
@@ -101,13 +101,12 @@ Let's create the database and tables, using an in-memory SQLite database:
 
 >>> db.create_all()
 
+To start storing file, let's create a location in a temporary directory:
+
 >>> srcroot = dirname(dirname('app.py'))
 >>> d = app.config['DATADIR']
 >>> if exists(d): shutil.rmtree(d)
 >>> makedirs(d)
-
-There's also a need to create a location for the buckets:
-
 >>> loc = Location(name='local', uri=d, default=True)
 >>> db.session.add(loc)
 >>> db.session.commit()
@@ -131,16 +130,14 @@ The REST API allows you to create buckets and perform CRUD operations on files.
 You can use query parameters in order to perform these operations.
 
 .. note::
-    Note that the api is exposed from :code:`/files/` and is registered as a
-    blueprint_api which means in our wrapper application will be prefixed with
-    :code:`/api/`. That means that our api will be exposed in our application
-    under :code:`/api/files/`.
+    The REST APIs endpoint is registered by the Invenio API instance. This
+    means that the endpoint is reachable with the path ``/api/files/``.
 
 
 Available methods and endpoints
 -------------------------------
 
-By default, the URL prefix for the REST API is under /files.
+By default, the URL prefix for the REST API is ``/files``.
 
 HEAD
 ^^^^
@@ -154,13 +151,13 @@ Check if bucket exists, returning either a 200 or a 404:
 GET
 ^^^
 
-Return list of files in bucket:
+Retrieve the latest version of files in bucket:
 
 .. code-block:: console
 
     GET /files/<bucket_id>/
 
-Return list of file versions:
+Retrieve all versions of files of files in a bucket:
 
 .. code-block:: console
 
@@ -172,13 +169,13 @@ Return list of multipart uploads:
 
     GET /files/<bucket_id>?uploads
 
-Download file:
+Download a file:
 
 .. code-block:: console
 
     GET /files/<bucket_id>/<file_name>
 
-Return list of parts of a multipart upload:
+Retrieve the list of parts of a multipart upload:
 
 .. code-block:: console
 
@@ -188,13 +185,13 @@ Return list of parts of a multipart upload:
 PUT
 ^^^
 
-Upload file:
+Upload a file to a bucket:
 
 .. code-block:: console
 
     PUT /files/<bucket_id>/<file_name>
 
-Upload part of in-progress multipart upload:
+Upload part of in-progress multipart upload to a bucket:
 
 .. code-block:: console
 
