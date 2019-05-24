@@ -250,14 +250,14 @@ Storage will serve as an interface for the actual file access.
 In the configuration of the application, the variable
 :py:data:`invenio_files_rest.config.FILES_REST_STORAGE_FACTORY`
 defines the path of the factory that will be used to create a storage instance.
-Each file instance uses the storage factory to create a storage interface for
-itself.
 
-Under the hood the module uses `PyFilesystem <https://www.pyfilesystem.org/>`_
-to save files. This file system abstraction gives us the flexibility to be able
-to swap storages very easy. The storage backend can also be a cloud service, as
-an example you can have a look at
-`invenio-s3 <https://invenio-s3.readthedocs.io/>`_ which offers integration
+Invenio-Files-REST comes with a default storage implementation
+`PyFilesystem <https://www.pyfilesystem.org/>`_ to save files locally.
+
+The module provides an abstract layer for storage implementation that allows
+to swap storages easily.
+For example the storage backend can be a cloud service, such as
+`Invenio-S3 <https://invenio-s3.readthedocs.io/>`_ which offers integration
 with any S3 REST API compatible object storage.
 
 
@@ -267,9 +267,9 @@ Build your own Storage Backend
 Advanced topic on how to implement and connect your own storage Backend for
 Invenio-Files-REST.
 
-In order to use a different storage backend, its required to subclass the
+In order to use a different storage backend, it is required to subclass the
 :py:data:`invenio_files_rest.storage.FileStorage` class, and provide
-implementations for some of its methods:
+implementations for some of its methods.
 
 Mandatory methods to implement:
 
@@ -293,7 +293,7 @@ Create Buckets
 --------------
 
 In order to upload, modify or delete files, a bucket needs to be created first.
-A bucket can be created by a POST request to the url prefix, i.e. /files.
+A bucket can be created by a :code:`POST` request to the endpoint :code:`/files`.
 The response will contain the unique ID of the bucket.
 A bucket can have one or more tags which store extra metadata for that bucket.
 Each tag is uniquely identified by a key.
@@ -329,12 +329,14 @@ Upload Files
 ------------
 
 The REST API allows you to upload, download and modify single files.
-A file is uniquely identified within a bucket by its name.
+A file is uniquely identified within a bucket by its :code:`key` (filename).
 Each file can have multiple versions.
 
-Let's upload a file called my_file.txt inside the bucket that was just created.
-To do this, the PUT command needs to be used, and the bucket ID as well
-as the file ("my_file.txt") need to be specified.
+Let's upload a file called :code:`my_file.txt` inside the bucket that was just
+created. A file can be added to a bucket (uploaded) by a :code:`PUT` request,
+which will create a new :code:`ObjectVersion`. The same will happen
+when uplading a file with the same :code:`key` (filename).
+
 
 Upload a file:
 
@@ -371,23 +373,14 @@ Upload a file:
         "size": 14
     }
 
-Should you want to update the same file with a new version you would use the
-same command. Automatically, the file will be versioned.
-
 
 JS Uploaders
 ^^^^^^^^^^^^
 
-There are a wide variety of JavaScript uploaders which could be used with
-Invenio-Files-REST. There is a possibility that the uploader might not work
-out of the box due to the fact that Invenio-Files-REST expects the submitted
-parameters to map to specific names.
-
-An example of a mapping like this can be found at
-:py:func:`invenio_files_rest.views.ngfileupload_uploadfactory` for the
-`ng-file-upload <https://github.com/danialfarid/ng-file-upload>`_ angular
-uploader. You can extend the upload factories according to your needs by
-providing your implementations in the following :code:`config` variables.
+Some JavaScript uploaders do not allow to customize the name of the request
+parameters.
+You can create an upload factory according to the specifications of your
+JavaScript uploader and update the relevant configuration as follows:
 
 1. Assing your factories to the :code:`config` variables:
 :py:data:`invenio_files_rest.config.FILES_REST_MULTIPART_PART_FACTORIES` and
@@ -417,21 +410,29 @@ is mapped to :code:`content-length`:
         ),
     })
 
+Invenio-Files-REST comes with an implementation for
+`ng-file-upload <https://github.com/danialfarid/ng-file-upload>`_ AngularJs
+uploader.
+
+For more details see
+:py:func:`invenio_files_rest.views.ngfileupload_uploadfactory`.
+
 Multipart Upload
 ^^^^^^^^^^^^^^^^
 
-In some cases, a file may be too large for a single upload. Or you may want to
+In some cases, a file may be too large for a single upload. You might want to
 speed up the upload process by uploading multiple parts in parallel. In these
-cases, you have to use multipart uploads. This requires that each part is the
-same size, except for the last one. Once all parts have been uploaded, the
-multipart upload completes, and the parts are merged into one single file. At
-this, point, it is no longer possible to upload new parts. When uploading a
-multipart file, if one of the chunks fails, the database is rolled back and
-the part is deleted.
+cases, you have to use multipart uploads.
 
-.. note:
-    **NOTE:** The last part needs to be less than or equal to the previous n-1
-    parts.
+This requires you to split the file you want to upload, in equal chunks except
+from the last one which has to be smaller or equal to the chunks size.
+
+Then each chunck can be uploaded in parallel. Once all parts have been uploaded,
+the multipart upload completes, and the parts are automatically merged into
+one single file.
+
+When uploading a multipart file, if one of the chunks fails, it will be
+discarded, and you can resubmit only the failed chunk to conclude your upload.
 
 As an example, let's create an 11MB file which will then be split into 2
 chunks using the linux :code:`split` command:
@@ -442,10 +443,10 @@ chunks using the linux :code:`split` command:
 
    split -b6291456 my_file.txt segment_
 
-To initialize a multipart upload, the POST command has to be used,
-and to specify the fact that it is a multipart upload, the "uploads" query
-parameter is used. Additionally, the total size and the part size need to be
-specified.
+A multipart upload can be initialised with a :code:`POST` request, sending
+the name of the file after merge, the chunk size and the total size.
+
+Then each part upload can be uploaded with a :code:`PUT` request.
 
 Create a new bucket:
 
@@ -475,6 +476,8 @@ The ID is contained in the response:
        "size":0
     }
 
+Multipart upload initialisation:
+
 .. code-block:: console
 
    $ B=c896d17b-0e7d-44b3-beba-7e43b0b1a7a4
@@ -482,6 +485,9 @@ The ID is contained in the response:
    $ curl -i -X POST \
      "http://localhost:5000/files/$B/my_file.txt?
       uploads&size=11534336&partSize=6291456"
+
+The response will contain the upload :code:`id` that is needed for the
+requests for the parts uploads:
 
 .. code-block:: json
 
@@ -509,8 +515,8 @@ The ID is contained in the response:
        "size":11534336
     }
 
-Continue uploading parts, by using the PUT command and specifying the id of
-the bucket:
+Continue uploading parts, by using a PUT request and specifying the upload
+:code:`id` of the bucket:
 
 .. code-block:: console
 
@@ -531,8 +537,8 @@ the bucket:
    $ curl -i -X PUT --data-binary @segment_ab \
      "http://localhost:5000/files/$B/my_file.txt?uploadId=$U&partNumber=1"
 
-Complete a multipart upload, by using the POST command; it will return a 200
-code on success:
+Complete a multipart upload, by submitting a :code:`POST` request, with the
+upload id.
 
 .. code-block:: console
 
