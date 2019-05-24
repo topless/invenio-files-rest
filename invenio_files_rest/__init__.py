@@ -293,8 +293,8 @@ Create Buckets
 --------------
 
 In order to upload, modify or delete files, a bucket needs to be created first.
-A bucket can be created by a :code:`POST` request to the endpoint :code:`/files`.
-The response will contain the unique ID of the bucket.
+A bucket can be created by a :code:`POST` request to the endpoint
+:code:`/files`. The response will contain the unique ID of the bucket.
 A bucket can have one or more tags which store extra metadata for that bucket.
 Each tag is uniquely identified by a key.
 
@@ -427,9 +427,9 @@ cases, you have to use multipart uploads.
 This requires you to split the file you want to upload, in equal chunks except
 from the last one which has to be smaller or equal to the chunks size.
 
-Then each chunck can be uploaded in parallel. Once all parts have been uploaded,
-the multipart upload completes, and the parts are automatically merged into
-one single file.
+Then each chunck can be uploaded in parallel. Once all parts have been
+uploaded, the multipart upload completes, and the parts are automatically
+merged into one single file.
 
 When uploading a multipart file, if one of the chunks fails, it will be
 discarded, and you can resubmit only the failed chunk to conclude your upload.
@@ -561,10 +561,10 @@ As for larger files, they are stored in a temporary location.
 You will need some extra configurations for nginx and Flask application in
 order to be able to upload large files.
 
-1. There is a possibility that Ngxinx might return
-:code:`413 (Request Entity Too Large)` for large files. In the configuration
-the body size of the request can be customized according to our needs. The
-following example configures nginx to accept up to :code:`25MB`.
+1. Ngxinx will return :code:`413 (Request Entity Too Large)` for large files.
+In its configuration, the body size of the request can be customized according
+to our needs. The following example configures nginx to accept up to
+:code:`25MB`.
 
 .. code-block:: console
 
@@ -574,10 +574,10 @@ following example configures nginx to accept up to :code:`25MB`.
     }
 
 2. You also have to specify :code:`MAX_CONTENT_LENGTH` header, otherwise Flask
-will reject incoming requests with a content length greater than this by returning a
+will reject incoming requests with a greater content length by returning a
 :code:`413 (Request Entity Too Large)`. If not set and the request does not
-specify a :code:`CONTENT_LENGTH`, no data will be read for security. You can
-set the :code:`MAX_CONTENT_LENGTH` to :code:`25MB`  like in the example below.
+specify a :code:`CONTENT_LENGTH`, no data will be read for security. The
+example below configues :code:`MAX_CONTENT_LENGTH` to :code:`25MB`.
 
 >>> app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
 
@@ -595,8 +595,8 @@ Once the bucket is created and a file is uploaded, it is possible
 to retrieve it with a GET request.
 
 By default, the latest version will be downloaded. To retrieve a specific
-version of the file, the versionId query parameter can be used, as in the
-example below:
+version of the file, the :code:`versionId` query parameter can be used, as in
+the example below:
 
 Download the latest version of the file:
 
@@ -610,11 +610,12 @@ Download a specific version of the file:
 
    $ curl -i http://localhost:5000/files/$B/my_file.txt?versionId=<version_id>
 
-**NOTE:** By default, the file is returned with the header
-:code:`'Content-Disposition': 'inline'`, so that the browser will try to
-preview it. In case you want to trigger a download of the file, use the
-:code:`download` query parameter, which will change the
-:code:`'Content-Disposition'` header to :code:`'attachment'`
+.. note::
+    By default, the file is returned with the header
+    :code:`'Content-Disposition': 'inline'`, so that the browser will try to
+    preview it. In case you want to trigger a download of the file, use the
+    :code:`download` query parameter, which will change the
+    :code:`'Content-Disposition'` header to :code:`'attachment'`
 
 .. code-block:: console
 
