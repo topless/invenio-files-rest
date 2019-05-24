@@ -555,16 +555,29 @@ code if it succeeds:
 
 Large Files
 ^^^^^^^^^^^
+The maximum file size for upload is defined by :code:`MAX_CONTENT_LENGTH`
+header. In addition your webserver i.e. Nginx will apply a limitation on the
+body size of the request.
 
-For smaller files, uploads are stored in the webserver's memory.
-As for larger files, they are stored in a temporary location.
-You will need some extra configurations for nginx and Flask application in
-order to be able to upload large files.
+1. You can modify the maximum allowed file size by changing the
+:code:`MAX_CONTENT_LENGTH` configuration variable. Flask
+will reject any incoming requests with a greater content length by returning a
+:code:`413 (Request Entity Too Large)`. For security if it is not set and
+the request does not specify a :code:`CONTENT_LENGTH` header, no data will be
+read. The example below configues :code:`MAX_CONTENT_LENGTH` to :code:`25MB`.
 
-1. Ngxinx will return :code:`413 (Request Entity Too Large)` for large files.
-In its configuration, the body size of the request can be customized according
-to our needs. The following example configures nginx to accept up to
-:code:`25MB`.
+>>> app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+
+.. note::
+
+    Special note on the :code:`get_data()` method: Calling this loads the full
+    request data into memory. This is only safe to do if the
+    :code:`MAX_CONTENT_LENGTH` is set.
+
+2. In case of using Nginx, the request body size is limitd by the configuration
+variable :code:`client_max_body_size`. For files with size greater than that,
+it will return :code:`413 (Request Entity Too Large)`. The following example
+configures Nginx to accept up to :code:`25MB`.
 
 .. code-block:: console
 
@@ -573,28 +586,14 @@ to our needs. The following example configures nginx to accept up to
         client_max_body_size 25M;
     }
 
-2. You also have to specify :code:`MAX_CONTENT_LENGTH` header, otherwise Flask
-will reject incoming requests with a greater content length by returning a
-:code:`413 (Request Entity Too Large)`. If not set and the request does not
-specify a :code:`CONTENT_LENGTH`, no data will be read for security. The
-example below configues :code:`MAX_CONTENT_LENGTH` to :code:`25MB`.
-
->>> app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
-
-.. note::
-
-    Special note on the :code:`get_data()` method: Calling this loads the full
-    request data into memory. This is only safe to do if the
-    :code:`max_content_length` is set.
-
 
 Retrieve Files
 --------------
 
 Once the bucket is created and a file is uploaded, it is possible
-to retrieve it with a GET request.
+to retrieve it with a :code:`GET` request.
 
-By default, the latest version will be downloaded. To retrieve a specific
+By default, the latest version will be retrieved. To retrieve a specific
 version of the file, the :code:`versionId` query parameter can be used, as in
 the example below:
 
@@ -632,10 +631,12 @@ serve user uploaded files. Here are some recommendations:
 way a malicious file can only attack other user uploaded files.
 
 2. Prevent the browser from rendering and executing HTML files by setting
-trusted=False.
+:code:`trusted=False` in the :code:`send_file()` method of your
+:code:`FileStorage` implementation.
 
-3. Force the browser to download the file as an attachment (as_attachment=True)
-by adding the :code:`download` keyword in the query parameters.
+3. Force the browser to download the file as an attachment
+:code:`as_attachment=True` by adding the :code:`download` keyword in the query
+parameters.
 
 
 Delete Files
@@ -643,20 +644,32 @@ Delete Files
 
 If you want to delete a file there are two options:
 
-1. Permanently erase a specific file version from the disk by specifying
-the version id:
+1. You can mark the file as deleted. This will create a new
+:code:`ObjectVersion` without content (creates a delete marker and makes the
+file inaccessible):
+
+.. code-block:: console
+
+   $ curl -i -X DELETE http://localhost:5000/files/$B/my_file.txt
+
+
+2. Permanently delete a specific object version, by specifying
+the version id. This will completely remove the :code:`ObjectVersion`:
 
 .. code-block:: console
 
    $ curl -i -X DELETE \
        http://localhost:5000/files/$B/my_file.txt?versionId=<version_id>
 
-2. Delete a whole file (creates a delete marker which makes the file
-inaccessible):
 
-.. code-block:: console
+.. :note::
+    :code:`ObjectVersion` that are marked as deleted can be retrieved only by
+    providing an explicit :code:`versionId` as query parameter.
 
-   $ curl -i -X DELETE http://localhost:5000/files/$B/my_file.txt
+
+The file instance on disk cannot be removed through REST API. You can use
+the provided task via CLI
+:py:func:`invenio_files_rest.tasks.remove_file_data`.
 
 
 Access control
@@ -667,7 +680,7 @@ Invenio-Files-REST depends on `Invenio-Access
 
 It comes with a default permission factory implementation which can be found
 at :py:data:`invenio_files_rest.permissions.permission_factory` and can be
-customized further, by providing our custom implementation in the relevant
+customized further, by providing your custom implementation in the relevant
 config variable
 :py:data:`invenio_files_rest.config.FILES_REST_PERMISSION_FACTORY`.
 
@@ -687,10 +700,9 @@ operations:
     - multipart-delete
 
 
-The aforementioned actions accept parameters, and can be simply applied by
-decorating our desired function. For example, to verify that the contents of
-a bucket can be read, you should have the bucket-read permission which takes
-the bucket as the argument.
+For example, to verify that the contents of a bucket can be read, you should
+add the decorator with :code:`bucket-read` action which takes the bucket as the
+argument.
 
 .. code-block:: python
 
@@ -699,8 +711,12 @@ the bucket as the argument.
         'bucket-read',
     )
     def foo():
-        print("Fucntion foo can read the content of the bucket")
+        print("Function foo can read the content of the bucket")
 
+
+By default when try perform an action and the permission check fails, the
+returned http status code will be :code:`404` instead of :code:`401` or
+:code:`403` to hide the existence or non, of objects.
 
 See :mod:`invenio_files_rest.permissions` for extensive documentation.
 
@@ -712,22 +728,21 @@ Invenio-Files-REST stores file checksums and regularly revalidates them, in
 order to verify the data integrity of all data at rest, as well as to detect
 corruption of data in transit.
 
-Whenever an operation like :code:`merge_multipartobject` the database is rolled
-back to reflect the state of the system before the action.
-
 For the computation of the checksum you can provide the desired algorithm,
 otherwise :code:`MD5` will be used.
 
-In the case of trying to remove a file, the expectation is for the
-FileInstance removal to succeed in the database so that afterwards
-it's possible to proceed with the removal of the actual file. By binding the
-actions together, in case of database operation error, you can prevent the
-system ending up with orphan files. Some of the tasks support :code:`silent`
-as an argument to prevent propagation of the errors.
+When uploading a file a checksum is computed on the fly and stored in the
+database.
 
-There is also a predefined task :code:`verify_checksum` which can be configured
-to run periodically (default is every 30 days) which iterates all files in our
-storage and validates their checksum.
+For all existing files there is a predefined task :code:`verify_checksum`
+which can be configured to run periodically (default is every 30 days) and
+iterates all files in your storage and validates their checksum.
+
+When removing a file from disk, the operation is a combination of two steps,
+first delete the :code:`FileInstance` from the database, and if it succeeds
+will try to delete the File from disk. This leaves the possibility of having
+a file on disk dangling in case the database removal works, and the disk file
+removal doesn't work.
 
 
 Signals
@@ -759,9 +774,9 @@ Data Migration
 --------------
 
 :code:`Locations` are used to represent different storage systems and possibly
-different geographical locations. :code:`Buckets` but also :code:`Objects` are
-assigned a Location. This approach provides extra flexibility when there's
-a need to migrate the data.
+different geographical locations. :code:`Buckets` but also
+:code:`ObjectVersions` are assigned a Location. This approach provides extra
+flexibility when there's a need to migrate the data.
 
 When a bucket is created, a Location needs to be provided, otherwise the
 default one is used.

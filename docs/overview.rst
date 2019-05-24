@@ -15,7 +15,7 @@ Before getting started a brief overview will introduce you to the key concepts
 and terminology of the module.
 
 
-.. figure:: static/InvenioFilesREST.png
+.. figure:: _static/InvenioFilesREST.png
     :alt: Overview of InvenioFilesREST
 
     Overview of Invenio-Files-REST
