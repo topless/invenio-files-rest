@@ -558,7 +558,8 @@ Large Files
 
 For smaller files, uploads are stored in the webserver's memory.
 As for larger files, they are stored in a temporary location.
-You will need some extra configurations for nginx and Flask application.
+You will need some extra configurations for nginx and Flask application in
+order to be able to upload large files.
 
 1. There is a possibility that Ngxinx might return
 :code:`413 (Request Entity Too Large)` for large files. In the configuration
@@ -572,15 +573,13 @@ following example configures nginx to accept up to :code:`25MB`.
         client_max_body_size 25M;
     }
 
-2. Specify :code:`MAX_CONTENT_LENGTH` header otherwise Flask will reject
-incoming requests with a content length greater than this by returning a
+2. You also have to specify :code:`MAX_CONTENT_LENGTH` header, otherwise Flask
+will reject incoming requests with a content length greater than this by returning a
 :code:`413 (Request Entity Too Large)`. If not set and the request does not
 specify a :code:`CONTENT_LENGTH`, no data will be read for security. You can
 set the :code:`MAX_CONTENT_LENGTH` to :code:`25MB`  like in the example below.
 
-.. code-block:: console
-
-    $ app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+>>> app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
 
 .. note::
 

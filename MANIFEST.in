@@ -25,3 +25,6 @@ recursive-include invenio_files_rest *.html
 recursive-include invenio_files_rest *.po *.pot *.mo
 recursive-include invenio_files_rest *.py
 recursive-include tests *.py
+
+# added by check_manifest.py
+recursive-include docs *.png
