@@ -14,6 +14,7 @@ retrieve files in a similar way to Amazon S3 APIs.
 Before getting started a brief overview will introduce you to the key concepts
 and terminology of the module.
 
+.. image:: static/InvenioFilesREST.png
 
 Location
 --------
