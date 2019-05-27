@@ -137,108 +137,764 @@ You can use query parameters in order to perform these operations.
 Available methods and endpoints
 -------------------------------
 
-By default, the URL prefix for the REST API is ``/files``.
+The following is a brief overview of the methods the REST API provides.
 
-HEAD
-^^^^
+By default, the URL prefix for the REST API is under /files.
 
-Check if bucket exists, returning either a 200 or a 404:
+
+Bucket Endpoints
+----------------
+
+Create
+^^^^^^
+
+**Description**
+    Creates a bucket in the default location.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters.
+
+**Request**
+
+.. code-block:: console
+
+    POST /files
+
+**Response**
+
+.. code-block:: json
+
+    {
+        "max_file_size": null,
+        "updated": "2019-05-24T08:59:40.356202+00:00",
+        "locked": false,
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794",
+            "uploads": "http://localhost:5000/files/
+                        436ac279-d85f-4500-8217-295804c14794?uploads",
+            "versions": "http://localhost:5000/files/
+                         436ac279-d85f-4500-8217-295804c14794?versions"
+        },
+        "created": "2019-05-24T08:59:40.356195+00:00",
+        "quota_size": null,
+        "id": "436ac279-d85f-4500-8217-295804c14794",
+        "size": 0
+    }
+
+
+Check existance
+^^^^^^^^^^^^^^^
+
+**Description**
+    Checks if a bucket exists.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters.
+
+**Request**
 
 .. code-block:: console
 
     HEAD /files/<bucket_id>
 
-GET
-^^^
-
-Retrieve the latest version of files in bucket:
+**Response**
 
 .. code-block:: console
 
-    GET /files/<bucket_id>/
+    Status: 200 OK
 
-Retrieve all versions of files of files in a bucket:
-
-.. code-block:: console
-
-    GET /files/<bucket_id>?versions
-
-Return list of multipart uploads:
+**Errors**
 
 .. code-block:: console
 
-    GET /files/<bucket_id>?uploads
+    Status: 404 NOT FOUND
 
-Download a file:
+
+List files
+^^^^^^^^^^
+
+**Description**
+    Returns list of all of the files in the specified bucket.
+
+**Parameters**
 
 .. code-block:: console
 
-    GET /files/<bucket_id>/<file_name>
+    No parameters
 
-Retrieve the list of parts of a multipart upload:
+**Request**
 
 .. code-block:: console
 
-    GET /files/<bucket_id>/<file_name>?uploadId=<id_number>
+    GET /files/<bucket_id>
+
+**Response**
+
+Example with no files in the bucket:
+
+.. code-block:: json
+
+    {
+        "max_file_size": null,
+        "updated": "2019-05-24T08:59:40.356202+00:00",
+        "locked": false,
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794",
+            "uploads": "http://localhost:5000/files/
+                        436ac279-d85f-4500-8217-295804c14794?uploads",
+            "versions": "http://localhost:5000/files/
+                         436ac279-d85f-4500-8217-295804c14794?versions"
+        },
+        "created": "2019-05-24T08:59:40.356195+00:00",
+        "quota_size": null,
+        "id": "436ac279-d85f-4500-8217-295804c14794",
+        "contents": [],
+        "size": 0
+    }
+
+Example with one file in the bucket:
+
+.. code-block:: json
+
+    {
+        "max_file_size": null,
+        "updated": "2019-05-24T09:20:36.361338+00:00",
+        "locked": false,
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794",
+            "uploads": "http://localhost:5000/files/
+                        436ac279-d85f-4500-8217-295804c14794?uploads",
+            "versions": "http://localhost:5000/files/
+                         436ac279-d85f-4500-8217-295804c14794?versions"
+        },
+        "created": "2019-05-24T08:59:40.356195+00:00",
+        "quota_size": null,
+        "id": "436ac279-d85f-4500-8217-295804c14794",
+        "contents": [
+            {
+                "mimetype": "text/plain",
+                "updated": "2019-05-24T09:20:36.344541+00:00",
+                "links": {
+                    "self": "http://localhost:5000/files/
+                             436ac279-d85f-4500-8217-295804c14794/example.txt",
+                    "version": "http://localhost:5000/files/
+                                436ac279-d85f-4500-8217-295804c14794/example.txt?
+                                versionId=39075b38-b354-4ce9-bd36-2425495e6a7a",
+                    "uploads": "http://localhost:5000/files/
+                                436ac279-d85f-4500-8217-295804c14794/example.txt?
+                                uploads"
+                },
+                "is_head": true,
+                "tags": {},
+                "checksum": "md5:2cad20c19a8eb9bb11a9f76527aec9bc",
+                "created": "2019-05-24T09:20:36.341621+00:00",
+                "version_id": "39075b38-b354-4ce9-bd36-2425495e6a7a",
+                "delete_marker": false,
+                "key": "example.txt",
+                "size": 12
+            }
+        ],
+        "size": 12
+    }
+
+**Errors**
+
+.. code-block:: json
+
+    {
+       "message":"Bucket does not exist.",
+       "status":404
+    }
 
 
-PUT
-^^^
+Working with files:
+-------------------
 
-Upload a file to a bucket:
+Upload files
+^^^^^^^^^^^^
+
+**Description**
+    Uploads a file.
+
+**Parameters**
+
+.. code-block:: console
+
+    binary: <file>
+
+**Request**
 
 .. code-block:: console
 
     PUT /files/<bucket_id>/<file_name>
 
-Upload part of in-progress multipart upload to a bucket:
+**Response**
+
+.. code-block:: json
+
+    {
+        "mimetype": "text/plain",
+        "updated": "2019-05-24T09:20:36.344541+00:00",
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794/example.txt",
+            "version": "http://localhost:5000/files/
+                        436ac279-d85f-4500-8217-295804c14794/example.txt?
+                        versionId=39075b38-b354-4ce9-bd36-2425495e6a7a",
+            "uploads": "http://localhost:5000/files/
+                       436ac279-d85f-4500-8217-295804c14794/example.txt?uploads"
+        },
+        "is_head": true,
+        "tags": {},
+        "checksum": "md5:2cad20c19a8eb9bb11a9f76527aec9bc",
+        "created": "2019-05-24T09:20:36.341621+00:00",
+        "version_id": "39075b38-b354-4ce9-bd36-2425495e6a7a",
+        "delete_marker": false,
+        "key": "example.txt",
+        "size": 12
+    }
+
+
+List file versions
+^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Returns a list of all versions of all files in the bucket.
+
+**Parameters**
 
 .. code-block:: console
 
-    PUT /files/<bucket_id>/<file_name>?uploadId=<id_number>&part=<part_number>
+    No parameters.
 
-POST
-^^^^
-
-Create a bucket:
+**Request**
 
 .. code-block:: console
 
-    POST /files/docs
+    GET /files/<bucket_id>?versions
 
-Initiate multipart upload:
+**Response**
+
+Example with two files (one with two versions):
+
+.. code-block:: json
+
+    {
+        "max_file_size": null,
+        "updated": "2019-05-24T10:08:34.174650+00:00",
+        "locked": false,
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794",
+            "uploads": "http://localhost:5000/files/
+                        436ac279-d85f-4500-8217-295804c14794?uploads",
+            "versions": "http://localhost:5000/files/4
+                         36ac279-d85f-4500-8217-295804c14794?versions"
+        },
+        "created": "2019-05-24T08:59:40.356195+00:00",
+        "quota_size": null,
+        "id": "436ac279-d85f-4500-8217-295804c14794",
+        "contents": [
+            {
+                "mimetype": "text/plain",
+                "updated": "2019-05-24T09:58:11.907546+00:00",
+                "links": {
+                    "self": "http://localhost:5000/files/
+                             436ac279-d85f-4500-8217-295804c14794/example.txt",
+                    "version": "http://localhost:5000/files/
+                               436ac279-d85f-4500-8217-295804c14794/example.txt?
+                               versionId=8d17d5ff-65c8-4339-ae83-4d4527f34fe7",
+                    "uploads": "http://localhost:5000/files/
+                               436ac279-d85f-4500-8217-295804c14794/example.txt?
+                               uploads"
+                },
+                "is_head": true,
+                "tags": {},
+                "checksum": "md5:e7e63425ce6f05c796d05adb6b5f94be",
+                "created": "2019-05-24T09:58:11.904366+00:00",
+                "version_id": "8d17d5ff-65c8-4339-ae83-4d4527f34fe7",
+                "delete_marker": false,
+                "key": "example.txt",
+                "size": 15
+            },
+            {
+                "mimetype": "text/plain",
+                "updated": "2019-05-24T09:58:11.903395+00:00",
+                "links": {
+                    "self": "http://localhost:5000/files/
+                            436ac279-d85f-4500-8217-295804c14794/example.txt?
+                            versionId=39075b38-b354-4ce9-bd36-2425495e6a7a",
+                    "version": "http://localhost:5000/files/
+                               436ac279-d85f-4500-8217-295804c14794/example.txt?
+                               versionId=39075b38-b354-4ce9-bd36-2425495e6a7a"
+                },
+                "is_head": false,
+                "tags": {},
+                "checksum": "md5:2cad20c19a8eb9bb11a9f76527aec9bc",
+                "created": "2019-05-24T09:20:36.341621+00:00",
+                "version_id": "39075b38-b354-4ce9-bd36-2425495e6a7a",
+                "delete_marker": false,
+                "key": "example.txt",
+                "size": 12
+            },
+            {
+                "mimetype": "text/plain",
+                "updated": "2019-05-24T10:08:34.172575+00:00",
+                "links": {
+                    "self": "http://localhost:5000/files/
+                             436ac279-d85f-4500-8217-295804c14794/foo.txt",
+                    "version": "http://localhost:5000/files/
+                                436ac279-d85f-4500-8217-295804c14794/foo.txt?
+                                versionId=ca1b9724-cc29-428c-a5d4-b06e1694eb14",
+                    "uploads": "http://localhost:5000/files/
+                                436ac279-d85f-4500-8217-295804c14794/foo.txt?
+                                uploads"
+                },
+                "is_head": true,
+                "tags": {},
+                "checksum": "md5:ff702f10bebfa2f1508deb475ded2d65",
+                "created": "2019-05-24T10:08:34.170827+00:00",
+                "version_id": "ca1b9724-cc29-428c-a5d4-b06e1694eb14",
+                "delete_marker": false,
+                "key": "foo.txt",
+                "size": 7
+            }
+        ],
+        "size": 34
+    }
+
+
+Download file
+^^^^^^^^^^^^^
+
+**Description**
+    Downloads a file.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
+
+.. code-block:: console
+
+    GET /files/<bucket_id>/<file_name>
+
+**Response**
+
+.. code-block:: console
+
+    File contents
+
+**Errors**
+
+.. code-block:: json
+
+    {
+        "message": "Object does not exists.",
+        "status": 404
+    }
+
+
+Delete file version
+^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Permanently erases the object version.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
+
+.. code-block:: console
+
+    DELETE /files/<bucket_id>/<file_name>?versionId=<version_id>
+
+**Response**
+
+.. code-block:: console
+
+    Status: 204 NO CONTENT
+
+**Errors**
+
+.. code-block:: json
+
+    {
+       "message":"Object does not exists.",
+       "status":404
+    }
+
+
+Delete file
+^^^^^^^^^^^
+
+**Description**
+    Marks whole file as deleted.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
+
+.. code-block:: console
+
+    DELETE /files/<bucket_id>/<file_name>
+
+**Response**
+
+.. code-block:: console
+
+    Status: 204 NO CONTENT
+
+**Errors**
+
+.. code-block:: json
+
+    {
+       "message":"Object does not exists.",
+       "status":404
+    }
+
+
+Working with multipart files:
+-----------------------------
+
+Initiate multipart upload
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Initiates a multipart upload.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
 
 .. code-block:: console
 
     POST /files/<bucket_id>/<file_name>?
          uploads&size=<total_size>&partSize=<part_size>
 
-Finalize multipart upload:
+**Response**
+
+.. code-block:: json
+
+    {
+        "updated": "2019-05-24T10:30:02.969221+00:00",
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794/bar.txt?
+                     uploadId=650dd4cb-4f7a-4671-a1e4-fd1dfd1d926c",
+            "object": "http://localhost:5000/files/
+                       436ac279-d85f-4500-8217-295804c14794/bar.txt",
+            "bucket": "http://localhost:5000/files/
+                       436ac279-d85f-4500-8217-295804c14794"
+        },
+        "last_part_size": 5242880,
+        "created": "2019-05-24T10:30:02.969216+00:00",
+        "bucket": "436ac279-d85f-4500-8217-295804c14794",
+        "completed": false,
+        "part_size": 6291456,
+        "key": "bar.txt",
+        "last_part_number": 1,
+        "id": "650dd4cb-4f7a-4671-a1e4-fd1dfd1d926c",
+        "size": 11534336
+    }
+
+**Errors**
+
+.. code-block:: json
+
+    {
+        "message": "The request was well-formed but was unable to be followed
+                    due to semantic errors.",
+        "status": 422
+    }
+
+
+    {
+        "status": 400,
+        "message": "Invalid part size."
+    }
+
+
+    {
+        "status": 400,
+        "message": "Invalid file size."
+    }
+
+
+    {
+        "message": "Bucket does not exist.",
+        "status": 404
+    }
+
+
+Add to multipart upload
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Uploads a part of an in-progress multipart upload.
+
+**Parameters**
+
+.. code-block:: console
+
+    binary: <file>
+
+**Request**
+
+.. code-block:: console
+
+    PUT /files/<bucket_id>/<file_name>?uploadId=<id_number>&part=<part_number>
+
+**Response**
+
+.. code-block:: json
+
+    {
+        "updated": "2019-05-24T10:37:36.734901+00:00",
+        "created": "2019-05-24T10:37:36.708936+00:00",
+        "checksum": "md5:bd3c485ea77f37d3cb04501ea6000e63",
+        "part_number": 0,
+        "end_byte": 6291456,
+        "start_byte": 0
+    }
+
+**Errors**
+
+.. code-block:: json
+
+    {
+        "status": 400,
+        "message": null
+    }
+
+    {
+        "status": 400,
+        "message": "No upload part detected in request."
+    }
+
+
+List in-progress multipart uploads
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Returns a list of all in-progress multipart uploads.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
+
+.. code-block:: console
+
+    GET /files/<bucket_id>?uploads
+
+**Response**
+
+.. code-block:: json
+
+    [
+        {
+            "updated": "2019-05-24T10:30:02.969221+00:00",
+            "links": {
+                "self": "http://localhost:5000/files/
+                         436ac279-d85f-4500-8217-295804c14794/bar.txt?
+                         uploadId=650dd4cb-4f7a-4671-a1e4-fd1dfd1d926c",
+                "object": "http://localhost:5000/files/
+                           436ac279-d85f-4500-8217-295804c14794/bar.txt",
+                "bucket": "http://localhost:5000/files/
+                           436ac279-d85f-4500-8217-295804c14794"
+            },
+            "last_part_size": 5242880,
+            "created": "2019-05-24T10:30:02.969216+00:00",
+            "bucket": "436ac279-d85f-4500-8217-295804c14794",
+            "completed": false,
+            "part_size": 6291456,
+            "key": "bar.txt",
+            "last_part_number": 1,
+            "id": "650dd4cb-4f7a-4671-a1e4-fd1dfd1d926c",
+            "size": 11534336
+        }
+    ]
+
+**Errors**
+
+.. code-block:: json
+
+    {
+        "message": "Bucket does not exist.",
+        "status": 404
+    }
+
+
+List uploaded parts
+^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Returns a list of all the uploaded parts of a multipart upload.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
+
+.. code-block:: console
+
+    GET /files/<bucket_id>/<file_name>?uploadId=<id_number>
+
+**Response**
+
+.. code-block:: json
+
+    {
+        "updated": "2019-05-24T10:37:36.707887+00:00",
+        "last_part_size": 5242880,
+        "links": {
+            "self": "http://localhost:5000/files/
+                     436ac279-d85f-4500-8217-295804c14794/bar.txt?
+                    uploadId=650dd4cb-4f7a-4671-a1e4-fd1dfd1d926c",
+            "object": "http://localhost:5000/files/
+                       436ac279-d85f-4500-8217-295804c14794/bar.txt",
+            "bucket": "http://localhost:5000/files/
+                       436ac279-d85f-4500-8217-295804c14794"
+        },
+        "created": "2019-05-24T10:30:02.969216+00:00",
+        "part_size": 6291456,
+        "completed": false,
+        "bucket": "436ac279-d85f-4500-8217-295804c14794",
+        "parts": [
+            {
+                "updated": "2019-05-24T10:37:36.734901+00:00",
+                "created": "2019-05-24T10:37:36.708936+00:00",
+                "checksum": "md5:bd3c485ea77f37d3cb04501ea6000e63",
+                "part_number": 0,
+                "end_byte": 6291456,
+                "start_byte": 0
+            }
+        ],
+        "key": "bar.txt",
+        "last_part_number": 1,
+        "id": "650dd4cb-4f7a-4671-a1e4-fd1dfd1d926c",
+        "size": 11534336
+    }
+
+**Errors**
+
+.. code-block:: json
+
+    {
+        "message": "The request was well-formed but was unable to be followed
+                    due to semantic errors.",
+        "status": 422
+    }
+
+    {
+        "message": "uploadId does not exists.",
+        "status": 404
+    }
+
+    {
+        "message": "Bucket does not exist.",
+        "status": 404
+    }
+
+
+Complete multipart upload
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Finalizes the multipart upload, merging all parts into one.
+
+**Parameters**
+
+.. code-block:: console
+
+    No parameters
+
+**Request**
 
 .. code-block:: console
 
     POST /files/<bucket_id>/<file_name>?uploadId=<id_number>
 
-DELETE
-^^^^^^
-
-Permanently erase file version:
+**Response**
 
 .. code-block:: console
 
-    DELETE /files/<bucket_id>/<file_name>?versionId=<version_id>
+    Status 200 OK
 
-Mark whole file as deleted:
+**Errors**
+
+.. code-block:: json
+
+    {
+        "status": 400,
+        "message": "Not all parts have been uploaded."
+    }
+
+
+Abort multipart upload
+^^^^^^^^^^^^^^^^^^^^^^
+
+**Description**
+    Aborts a multipart upload.
+
+**Parameters**
 
 .. code-block:: console
 
-    DELETE /files/<bucket_id>/<file_name>
+    No parameters
 
-Abort multipart upload:
+**Request**
 
 .. code-block:: console
 
     DELETE /files/<bucket_id>/<file_name>?uploadId=<upload_id>
+
+**Response**
+
+.. code-block:: console
+
+    Status: 204 NO CONTENT
+
+**Errors**
+
+.. code-block:: json
+
+    {
+        "message": "uploadId does not exists.",
+        "status": 404
+    }
 
 
 Storage Backends
